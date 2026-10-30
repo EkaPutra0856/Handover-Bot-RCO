@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handover RCO</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="logo">RCO</div>
+    <div>
+      <h1 id="title">Handover Polisi – Team RCO</h1>
+      <div class="sub">Dashboard issue dari spreadsheet handover</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="meta">
+      <div id="fetched">Memuat data…</div>
+      <label class="switch" title="Ambil data terbaru otomatis tiap 5 menit"><input type="checkbox" id="auto"> Auto refresh 5 menit</label>
+    </div>
+    <button class="btn ghost-light" id="refresh" title="Ambil ulang dari spreadsheet (R)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> Refresh
+    </button>
+    <a class="btn ghost-light" id="sheet-link" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> Spreadsheet
+    </a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card filters">
+    <div class="frow">
+      <span class="flabel">Periode</span>
+      <div class="seg" id="presets">
+        <button data-p="today">Hari ini</button>
+        <button data-p="yesterday">Kemarin</button>
+        <button data-p="week">Minggu ini</button>
+        <button data-p="lastweek">Minggu lalu</button>
+        <button data-p="month">Bulan ini</button>
+        <button data-p="lastmonth">Bulan lalu</button>
+      </div>
+      <div class="dates">
+        <input type="date" id="start" aria-label="Tanggal mulai"> <span class="muted">s/d</span> <input type="date" id="end" aria-label="Tanggal akhir">
+      </div>
+    </div>
+    <div class="frow">
+      <span class="flabel">Tim</span>
+      <div class="chips" id="team-chips"></div>
+      <span class="flabel">Kategori</span>
+      <div class="chips" id="cat-chips">
+        <button class="chip" data-c="pending"><span class="dot pending"></span>Pending</button>
+        <button class="chip" data-c="progress"><span class="dot progress"></span>On Progress</button>
+        <button class="chip" data-c="done"><span class="dot done"></span>Done</button>
+      </div>
+      <button class="chip" id="only-orange" title="Hanya baris orange: menunggu tindak lanjut eksternal"><span class="dot orange"></span>Menunggu eksternal</button>
+    </div>
+    <div class="frow">
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Cari nomor issue, aplikasi, PIC, atau status…  (tekan / )">
+      </div>
+      <button class="btn" id="reset">Reset filter</button>
+    </div>
+  </section>
+
+  <div id="msg-area"></div>
+
+  <section class="stats" id="stats"></section>
+
+  <div class="grid2">
+    <section class="card" id="table-card">
+      <div class="panel-h">
+        <h2>Daftar Issue</h2><span class="count" id="count"></span>
+        <div class="spacer"></div>
+        <button class="btn" id="csv" title="Download tabel yang tampil sebagai CSV (Excel)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg> CSV
+        </button>
+        <button class="btn primary" id="export">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6 18.7 19.8c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9-8.2c.4-.4-.1-.6-.6-.2L6.3 13.4l-4.8-1.5c-1-.3-1.1-1 .2-1.5L20.4 3.2c.9-.3 1.7.2 1.5 1.4z"/></svg>
+          Export ke Chat
+        </button>
+      </div>
+      <div class="tbl-wrap" id="tbl-wrap">
+        <table>
+          <thead><tr id="thead"></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div id="empty" class="empty" hidden></div>
+        <div id="more" class="more" hidden><button class="btn" id="more-btn"></button></div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card">
+        <div class="panel-h"><h2>Per Tim</h2><span class="count">klik untuk filter</span></div>
+        <div class="teams" id="teams"></div>
+        <div class="legend"><span><span class="dot pending"></span> Pending</span><span><span class="dot progress"></span> On Progress</span><span><span class="dot done"></span> Done</span></div>
+      </section>
+      <section class="card">
+        <div class="panel-h"><h2>Aplikasi Terbanyak</h2><span class="count">belum selesai</span></div>
+        <div class="top-apps" id="apps"></div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<div class="modal-bg" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="card modal">
+    <div class="modal-h">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#229ed9"><path d="M21.9 4.6 18.7 19.8c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9-8.2c.4-.4-.1-.6-.6-.2L6.3 13.4l-4.8-1.5c-1-.3-1.1-1 .2-1.5L20.4 3.2c.9-.3 1.7.2 1.5 1.4z"/></svg>
+      <h3 id="modal-title">Preview Pesan Telegram</h3>
+      <button class="x" id="x" aria-label="Tutup">×</button>
+    </div>
+    <div class="modal-opts">
+      <label class="switch"><input type="checkbox" id="opt-detail"> Tampilkan nama aplikasi</label>
+      <label class="switch"><input type="checkbox" id="opt-split"> Tiap kategori bubble terpisah</label>
+      <span class="muted" id="opt-info"></span>
+    </div>
+    <div class="tg-area" id="preview"></div>
+    <div class="confirm-box" id="confirm">
+      <span id="confirm-text"></span>
+      <span style="flex:1"></span>
+      <button class="btn" id="confirm-no">Batal</button>
+      <button class="btn tg" id="confirm-yes">Ya, kirim sekarang</button>
+    </div>
+    <div class="modal-f">
+      <span class="info" id="target"></span>
+      <button class="btn" id="close">Close</button>
+      <button class="btn" id="copy">Salin teks</button>
+      <button class="btn tg" id="send">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6 18.7 19.8c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9-8.2c.4-.4-.1-.6-.6-.2L6.3 13.4l-4.8-1.5c-1-.3-1.1-1 .2-1.5L20.4 3.2c.9-.3 1.7.2 1.5 1.4z"/></svg>
+        Kirim ke Tele
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/app.js" defer></script>
+</body>
+</html>

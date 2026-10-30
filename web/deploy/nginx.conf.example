@@ -1,0 +1,29 @@
+# Contoh reverse proxy HTTPS untuk versi web (server Linux dengan nginx).
+# 1. docker compose up -d   (web listen di 127.0.0.1:8080, tidak terbuka langsung ke jaringan)
+# 2. Isi WEB_PASSWORD di .env (login Basic Auth tetap dipakai di belakang HTTPS)
+# 3. Salin file ini ke /etc/nginx/sites-available/handover, ganti server_name & sertifikat, lalu:
+#    ln -s /etc/nginx/sites-available/handover /etc/nginx/sites-enabled/ && nginx -t && systemctl reload nginx
+
+server {
+    listen 80;
+    server_name handover.example.local;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name handover.example.local;
+
+    ssl_certificate     /etc/ssl/certs/handover.crt;
+    ssl_certificate_key /etc/ssl/private/handover.key;
+
+    # Ambil data dari spreadsheet bisa makan waktu ~20 detik.
+    proxy_read_timeout 120s;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

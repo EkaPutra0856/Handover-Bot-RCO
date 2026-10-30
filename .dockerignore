@@ -1,0 +1,13 @@
+.env
+.venv
+secrets
+data
+tests
+docs
+__pycache__
+.pytest_cache
+web/tests
+web/README.md
+web/deploy
+.vscode
+*.md

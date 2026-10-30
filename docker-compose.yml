@@ -1,0 +1,31 @@
+services:
+  bot:
+    build: .
+    image: handover-bot
+    container_name: handover-bot
+    env_file: .env
+    environment:
+      SECRETS_DIR: /app/secrets
+    volumes:
+      - ./secrets:/app/secrets
+      - ./data:/app/data
+    restart: unless-stopped
+
+  # Versi web (folder web/): http://localhost:8080, hanya bisa dibuka dari PC ini.
+  # Supaya bisa dibuka dari PC lain di jaringan: ganti "127.0.0.1:8080:8080" jadi "8080:8080"
+  # dan isi WEB_PASSWORD di .env. Panduan lengkap: web/README.md
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: handover-web
+    container_name: handover-web
+    env_file: .env
+    environment:
+      SECRETS_DIR: /app/secrets
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./secrets:/app/secrets
+      - ./data:/app/data
+    restart: unless-stopped

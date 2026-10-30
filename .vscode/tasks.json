@@ -1,0 +1,52 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Tes (pytest)",
+      "type": "shell",
+      "command": "${workspaceFolder}\.venv\Scripts\python.exe -m pytest -q",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: build & jalankan bot + web",
+      "type": "shell",
+      "command": "docker compose up -d --build",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: status",
+      "type": "shell",
+      "command": "docker compose ps",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: log web",
+      "type": "shell",
+      "command": "docker compose logs -f --tail 100 web",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: log bot",
+      "type": "shell",
+      "command": "docker compose logs -f --tail 100 bot",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: restart web",
+      "type": "shell",
+      "command": "docker compose up -d --build web",
+      "problemMatcher": []
+    },
+    {
+      "label": "Buka web (localhost:8080)",
+      "type": "shell",
+      "command": "start http://localhost:8080",
+      "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } },
+      "problemMatcher": []
+    }
+  ]
+}
